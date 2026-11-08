@@ -41,7 +41,8 @@ jobs:
 
       - name: Extract project
         run: |
-        unzip -o JeenySmartCaptain-Updated.zip -d project
+             unzip -o
+              JeenySmartCaptain-Updated.zip -d project
 
       - name: Fix Java and Kotlin compatibility
         run: |
