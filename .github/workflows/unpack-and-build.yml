@@ -1,10 +1,10 @@
 
-
 name: Build Jeeny Smart Captain APK
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -18,17 +18,61 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      - name: Install Android SDK
+        run: |
+          SDK_ROOT="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          echo "ANDROID_HOME=$SDK_ROOT" >> $GITHUB_ENV
+          SDKMANAGER=$(find "$SDK_ROOT/cmdline-tools" -name sdkmanager -type f | head -1)
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager not found"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --sdk_root="$SDK_ROOT" --licenses
+          "$SDKMANAGER" --sdk_root="$SDK_ROOT" --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
+
       - name: Extract project
         run: |
-          mkdir -p source
-          unzip -q JeenySmartCaptain-GitHub-Ready-v2.zip -d source
-          test -f source/JeenySmartCaptain/app/build.gradle.kts
+          unzip -o JeenySmartCaptain-GitHub-Ready-v2.zip -d project
+
+      - name: Fix Java and Kotlin compatibility
+        run: |
+          cat > project/JeenySmartCaptain/app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+
+          android {
+              namespace = "com.example.jeenysmartcaptain"
+              compileSdk = 35
+
+              defaultConfig {
+                  applicationId = "com.example.jeenysmartcaptain"
+                  minSdk = 26
+                  targetSdk = 35
+                  versionCode = 1
+                  versionName = "0.1.0"
+              }
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+          }
+          EOF
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -36,12 +80,13 @@ jobs:
           gradle-version: '8.9'
 
       - name: Build APK
-        working-directory: source/JeenySmartCaptain
-        run: gradle --no-daemon assembleDebug
+        run: |
+          gradle -p project/JeenySmartCaptain assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: JeenySmartCaptain-APK
-          path: source/JeenySmartCaptain/app/build/outputs/apk/debug/app-debug.apk
+          path: project/JeenySmartCaptain/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
           
