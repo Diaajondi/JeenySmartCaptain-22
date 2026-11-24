@@ -7,7 +7,7 @@ on:
     branches:
       - development-next
     paths:
-      - 'JeenySmartCaptain-MultiPlatform-0.3.0.zip'
+      - 'JeenySmartCaptain-MultiPlatform-0.3.1.zip'
       - '.github/workflows/build.yml'
 
 permissions:
@@ -22,18 +22,15 @@ jobs:
       ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
-      # 1. Download repository files
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2. Install Java
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      # 3. Download Android Command Line Tools
       - name: Install Android Command-line Tools
         run: |
           mkdir -p "$ANDROID_HOME/cmdline-tools"
@@ -55,7 +52,6 @@ jobs:
 
           sdkmanager --version
 
-      # 4. Install Android SDK packages
       - name: Install Android SDK packages
         run: |
           export PATH="$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH"
@@ -67,35 +63,29 @@ jobs:
             "platforms;android-35" \
             "build-tools;35.0.0"
 
-      # 5. Install Gradle
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      # 6. Extract the new project
-      - name: Extract new MultiPlatform project
+      - name: Extract MultiPlatform project
         run: |
-          unzip -q JeenySmartCaptain-MultiPlatform-0.3.0.zip -d source
+          unzip -q JeenySmartCaptain-MultiPlatform-0.3.1.zip -d source
 
           test -f source/settings.gradle.kts
           test -f source/build.gradle.kts
           test -f source/app/build.gradle.kts
           test -f source/app/src/main/AndroidManifest.xml
 
-      # 7. Build APK
       - name: Build Debug APK
         working-directory: source
-        run: |
-          gradle assembleDebug --no-daemon
+        run: gradle assembleDebug --no-daemon
 
-      # 8. Verify APK
       - name: Verify APK
         run: |
           test -f source/app/build/outputs/apk/debug/app-debug.apk
           ls -lh source/app/build/outputs/apk/debug/app-debug.apk
 
-      # 9. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
