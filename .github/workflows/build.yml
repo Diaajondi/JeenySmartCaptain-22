@@ -7,7 +7,7 @@ on:
     branches:
       - development-next
     paths:
-      - 'JeenySmartCaptain-MultiPlatform-0.3.1.zip'
+      - 'JeenySmartCaptain-MultiPlatform-0.3.2.zip'
       - '.github/workflows/build.yml'
 
 permissions:
@@ -68,9 +68,9 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Extract MultiPlatform project
+      - name: Extract project 0.3.2
         run: |
-          unzip -q JeenySmartCaptain-MultiPlatform-0.3.1.zip -d source
+          unzip -q JeenySmartCaptain-MultiPlatform-0.3.2.zip -d source
 
           test -f source/settings.gradle.kts
           test -f source/build.gradle.kts
@@ -89,7 +89,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: JeenySmartCaptain-MultiPlatform-APK
+          name: JeenySmartCaptain-MultiPlatform-0.3.2-APK
           path: source/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           
