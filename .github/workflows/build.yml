@@ -1,23 +1,26 @@
-
-name: Build Jeeny Smart Captain APK
+name: Build Jeeny Smart Captain 0.3.9
 
 on:
   workflow_dispatch:
+
   push:
     branches:
       - main
       - development-next
+    paths:
+      - JeenySmartCaptain-0.3.9-source.zip
+      - .github/workflows/android.yml
 
 permissions:
   contents: read
 
 jobs:
   build:
-    name: Build Jeeny Smart Captain 0.3.6
+    name: Build Android APK 0.3.9
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Source
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup JDK 17
@@ -33,11 +36,13 @@ jobs:
 
       - name: Verify and Extract Source
         run: |
-          test -f JeenySmartCaptain-0.3.6-source.zip
-          unzip -q JeenySmartCaptain-0.3.6-source.zip -d source
+          test -f JeenySmartCaptain-0.3.9-source.zip
+          unzip -q JeenySmartCaptain-0.3.9-source.zip -d source
+
           test -f source/settings.gradle.kts
           test -f source/app/build.gradle.kts
-          grep -q 'versionName = "0.3.6"' source/app/build.gradle.kts
+
+          grep -q 'versionName = "0.3.9"' source/app/build.gradle.kts
 
       - name: Build Debug APK
         working-directory: source
@@ -46,7 +51,6 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: JeenySmartCaptain-0.3.6
+          name: JeenySmartCaptain-0.3.9
           path: source/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          
