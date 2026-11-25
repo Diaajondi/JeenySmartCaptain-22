@@ -1,3 +1,4 @@
+
 name: Build Jeeny Smart Captain 0.3.9
 
 on:
@@ -8,8 +9,8 @@ on:
       - main
       - development-next
     paths:
-      - JeenySmartCaptain-0.3.9-source.zip
-      - .github/workflows/android.yml
+      - 'JeenySmartCaptain-0.3.9-source.zip'
+      - '.github/workflows/build.yml'
 
 permissions:
   contents: read
@@ -54,3 +55,4 @@ jobs:
           name: JeenySmartCaptain-0.3.9
           path: source/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          
